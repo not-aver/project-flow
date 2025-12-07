@@ -8,9 +8,18 @@ import {
   Button,
   Stack,
   IconButton,
+  useTheme,
+  useMediaQuery,
+  Slide,
 } from '@mui/material';
+import { TransitionProps } from '@mui/material/transitions';
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 import { Project, CreateProjectPayload, UpdateProjectPayload } from '../../services/projectService';
+
+// Bottom sheet transition for mobile
+const SlideTransition = (props: TransitionProps & { children: React.ReactElement }) => {
+  return <Slide direction="up" {...props} />;
+};
 
 type SubmitPayload = CreateProjectPayload | UpdateProjectPayload;
 
@@ -23,6 +32,9 @@ type ProjectModalProps = {
 };
 
 const ProjectModal = ({ open, onClose, onSubmit, project, loading = false }: ProjectModalProps) => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  
   const [form, setForm] = useState({ name: '', description: '' });
 
   useEffect(() => {
@@ -52,9 +64,26 @@ const ProjectModal = ({ open, onClose, onSubmit, project, loading = false }: Pro
   };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: '10px' } }}>
+    <Dialog 
+      open={open} 
+      onClose={onClose} 
+      maxWidth="sm" 
+      fullWidth
+      fullScreen={isMobile}
+      TransitionComponent={isMobile ? SlideTransition : undefined}
+      PaperProps={{ 
+        sx: { 
+          borderRadius: isMobile ? '16px 16px 0 0' : '10px',
+          margin: isMobile ? 0 : '32px',
+          maxHeight: isMobile ? '90vh' : 'auto',
+        } 
+      }}
+    >
       <form onSubmit={handleSubmit}>
-        <DialogTitle>
+        <DialogTitle sx={{ 
+          pt: isMobile ? 3 : 2,
+          pb: isMobile ? 2 : 2,
+        }}>
           <Stack direction="row" justifyContent="space-between" alignItems="center">
             <span>{project ? 'Редактировать проект' : 'Создать проект'}</span>
             <IconButton onClick={onClose} size="small">
@@ -70,12 +99,12 @@ const ProjectModal = ({ open, onClose, onSubmit, project, loading = false }: Pro
               fullWidth
               value={form.name}
               onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
-              autoFocus
+              autoFocus={!isMobile}
             />
             <TextField
               label="Описание"
               multiline
-              rows={4}
+              rows={isMobile ? 5 : 4}
               fullWidth
               value={form.description}
               onChange={(e) => setForm((prev) => ({ ...prev, description: e.target.value }))}
@@ -83,11 +112,27 @@ const ProjectModal = ({ open, onClose, onSubmit, project, loading = false }: Pro
             />
           </Stack>
         </DialogContent>
-        <DialogActions sx={{ px: 3, pb: 3 }}>
-          <Button onClick={onClose} disabled={loading}>
+        <DialogActions sx={{ 
+          px: 3, 
+          pb: isMobile ? 3 : 3,
+          pt: 2,
+          gap: 1,
+          flexDirection: isMobile ? 'column-reverse' : 'row',
+        }}>
+          <Button 
+            onClick={onClose} 
+            disabled={loading}
+            fullWidth={isMobile}
+            variant={isMobile ? 'outlined' : 'text'}
+          >
             Отмена
           </Button>
-          <Button type="submit" variant="contained" disabled={loading || !form.name.trim()}>
+          <Button 
+            type="submit" 
+            variant="contained" 
+            disabled={loading || !form.name.trim()}
+            fullWidth={isMobile}
+          >
             {project ? 'Сохранить' : 'Создать'}
           </Button>
         </DialogActions>

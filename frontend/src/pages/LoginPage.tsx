@@ -67,6 +67,11 @@ const LoginPage = () => {
             loading={submitting}
             size="large"
             fullWidth
+            sx={{
+              py: 1.5,
+              fontSize: '1rem',
+              fontWeight: 600,
+            }}
           >
             Войти
           </LoadingButton>

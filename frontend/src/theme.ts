@@ -35,6 +35,15 @@ const theme = createTheme({
   shape: {
     borderRadius: 8,
   },
+  breakpoints: {
+    values: {
+      xs: 0,
+      sm: 600,
+      md: 900,
+      lg: 1200,
+      xl: 1536,
+    },
+  },
   components: {
     MuiButton: {
       defaultProps: {
@@ -43,6 +52,26 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           borderRadius: 8,
+          minHeight: 44, // Touch-friendly size
+          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+          '&:active': {
+            transform: 'scale(0.98)',
+          },
+        },
+        sizeLarge: {
+          minHeight: 48,
+        },
+      },
+    },
+    MuiIconButton: {
+      styleOverrides: {
+        root: {
+          minWidth: 44,
+          minHeight: 44,
+          transition: 'all 0.2s ease',
+          '&:active': {
+            transform: 'scale(0.95)',
+          },
         },
       },
     },
@@ -50,6 +79,7 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           borderRadius: 10,
+          transition: 'box-shadow 0.3s ease, transform 0.3s ease',
         },
       },
     },
@@ -57,6 +87,7 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           borderRadius: 10,
+          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
         },
       },
     },

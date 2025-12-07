@@ -11,13 +11,18 @@ import {
   Link as MuiLink,
   Stack,
   Typography,
+  useMediaQuery,
+  useTheme,
 } from '@mui/material';
 import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded';
 import AddRoundedIcon from '@mui/icons-material/AddRounded';
 import RefreshRoundedIcon from '@mui/icons-material/RefreshRounded';
 import TaskColumn from '../components/tasks/TaskColumn';
+import TaskColumnMobile from '../components/tasks/TaskColumnMobile';
 import TaskModal from '../components/tasks/TaskModal';
 import TimeTrackerPanel from '../components/time/TimeTrackerPanel';
+import PullToRefreshIndicator from '../components/common/PullToRefreshIndicator';
+import { usePullToRefresh } from '../hooks/usePullToRefresh';
 import { projectService, Project } from '../services/projectService';
 import { taskService, Task } from '../services/taskService';
 
@@ -31,6 +36,8 @@ const STATUS_LABELS: Record<Task['status'], string> = {
 const ProjectBoardPage = () => {
   const { projectId } = useParams<{ projectId: string }>();
   const navigate = useNavigate();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   const [project, setProject] = useState<Project | null>(null);
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -40,7 +47,19 @@ const ProjectBoardPage = () => {
   const [taskModalOpen, setTaskModalOpen] = useState(false);
   const [taskModalStatus, setTaskModalStatus] = useState<Task['status']>('TODO');
   const [editingTask, setEditingTask] = useState<Task | null>(null);
-  const [reordering, setReordering] = useState(false);
+  const [expandedColumn, setExpandedColumn] = useState<Task['status'] | null>('TODO');
+
+  // Pull to refresh for mobile
+  const { containerRef, isRefreshing, pullDistance, threshold } = usePullToRefresh({
+    onRefresh: async () => {
+      if (!projectId) return;
+      await Promise.all([
+        loadProject(projectId),
+        loadTasks(projectId)
+      ]);
+    },
+    isEnabled: isMobile,
+  });
 
   useEffect(() => {
     if (!projectId) return;
@@ -195,10 +214,30 @@ const ProjectBoardPage = () => {
   }
 
   return (
-    <Box minHeight="100vh" bgcolor="background.default" px={{ xs: 2, md: 4 }} py={4}>
-      <Stack direction="row" alignItems="center" justifyContent="space-between" mb={3}>
+    <Box 
+      ref={containerRef}
+      minHeight="100vh" 
+      bgcolor="background.default" 
+      px={{ xs: 2, md: 4 }} 
+      py={4}
+    >
+      {/* Pull to Refresh Indicator - Mobile Only */}
+      {isMobile && (
+        <PullToRefreshIndicator
+          isRefreshing={isRefreshing}
+          pullDistance={pullDistance}
+          threshold={threshold}
+        />
+      )}
+      <Stack 
+        direction={{ xs: 'column', md: 'row' }} 
+        alignItems={{ xs: 'stretch', md: 'center' }} 
+        justifyContent="space-between" 
+        mb={3}
+        spacing={{ xs: 2, md: 0 }}
+      >
         <Stack spacing={1}>
-          <Breadcrumbs>
+          <Breadcrumbs sx={{ display: { xs: 'none', sm: 'flex' } }}>
             <MuiLink underline="hover" color="inherit" onClick={() => navigate('/app')} sx={{ cursor: 'pointer' }}>
               Проекты
             </MuiLink>
@@ -208,23 +247,40 @@ const ProjectBoardPage = () => {
             <IconButton color="primary" onClick={() => navigate('/app')}>
               <ArrowBackRoundedIcon />
             </IconButton>
-            <Typography variant="h4" fontWeight={600}>
+            <Typography 
+              variant="h4"
+              fontWeight={600}
+              sx={{ fontSize: { xs: '1.5rem', md: '2.125rem' } }}
+            >
               {project?.name || 'Загрузка проекта...'}
             </Typography>
             {loadingProject && <CircularProgress size={20} />}
           </Stack>
           {project?.description && (
-            <Typography color="text.secondary" maxWidth={640}>
+            <Typography color="text.secondary" maxWidth={640} sx={{ display: { xs: 'none', sm: 'block' } }}>
               {project.description}
             </Typography>
           )}
         </Stack>
         <Stack direction="row" spacing={1}>
-          <Button variant="outlined" startIcon={<RefreshRoundedIcon />} onClick={() => loadTasks(projectId)}>
-            Обновить
+          <Button 
+            variant="outlined" 
+            startIcon={isMobile ? undefined : <RefreshRoundedIcon />}
+            onClick={() => loadTasks(projectId)}
+            sx={{ minWidth: { xs: 44, sm: 'auto' } }}
+          >
+            {isMobile ? <RefreshRoundedIcon /> : 'Обновить'}
           </Button>
-          <Button variant="contained" startIcon={<AddRoundedIcon />} onClick={() => setTaskModalOpen(true)}>
-            Новая задача
+          <Button 
+            variant="contained" 
+            startIcon={isMobile ? undefined : <AddRoundedIcon />}
+            onClick={() => setTaskModalOpen(true)}
+            sx={{ 
+              minWidth: { xs: 44, sm: 'auto' },
+              flexShrink: 0,
+            }}
+          >
+            {isMobile ? <AddRoundedIcon /> : 'Новая задача'}
           </Button>
         </Stack>
       </Stack>
@@ -247,6 +303,11 @@ const ProjectBoardPage = () => {
             groupedTasks={groupedTasks}
             loading={false}
             statusActions={statusActions}
+            isMobile={isMobile}
+            expandedColumn={expandedColumn}
+            onToggleColumn={(status) => {
+              setExpandedColumn(expandedColumn === status ? null : status);
+            }}
           />
         </DragDropContext>
       )}
@@ -273,9 +334,40 @@ type GridBoardProps = {
     onEdit: (task: Task) => void;
     onDelete: (task: Task) => void;
   };
+  isMobile: boolean;
+  expandedColumn: Task['status'] | null;
+  onToggleColumn: (status: Task['status']) => void;
 };
 
-const GridBoard = ({ groupedTasks, loading, statusActions }: GridBoardProps) => {
+const GridBoard = ({ 
+  groupedTasks, 
+  loading, 
+  statusActions, 
+  isMobile,
+  expandedColumn,
+  onToggleColumn,
+}: GridBoardProps) => {
+  if (isMobile) {
+    return (
+      <Stack spacing={2}>
+        {STATUSES.map((status) => (
+          <TaskColumnMobile
+            key={status}
+            id={status}
+            title={STATUS_LABELS[status]}
+            tasks={groupedTasks[status] || []}
+            isLoading={loading}
+            isExpanded={expandedColumn === status}
+            onToggle={() => onToggleColumn(status)}
+            onAdd={statusActions(status).onAdd}
+            onEdit={statusActions(status).onEdit}
+            onDelete={statusActions(status).onDelete}
+          />
+        ))}
+      </Stack>
+    );
+  }
+
   return (
     <Box
       sx={{

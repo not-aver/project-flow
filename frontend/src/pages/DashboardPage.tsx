@@ -12,6 +12,8 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
+  useTheme,
+  useMediaQuery,
 } from '@mui/material';
 import AddRoundedIcon from '@mui/icons-material/AddRounded';
 import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded';
@@ -30,6 +32,9 @@ import { useNavigate } from 'react-router-dom';
 const DashboardPage = () => {
   const { logout } = useAuth();
   const navigate = useNavigate();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -126,31 +131,43 @@ const DashboardPage = () => {
         mb={4}
       >
         <Box>
-          <Typography variant="h4" fontWeight={600}>
+          <Typography 
+            variant="h4"
+            fontWeight={600}
+            sx={{ fontSize: { xs: '1.5rem', md: '2.125rem' } }}
+          >
             Мои проекты
           </Typography>
-          <Typography color="text.secondary">
+          <Typography color="text.secondary" sx={{ display: { xs: 'none', sm: 'block' } }}>
             Управляйте проектами и задачами в одном месте
           </Typography>
         </Box>
-        <Stack direction="row" spacing={1}>
+        <Stack direction="row" spacing={1} width={{ xs: '100%', md: 'auto' }}>
           <Button
             variant="outlined"
             color="secondary"
-            startIcon={<LogoutRoundedIcon />}
+            startIcon={isMobile ? undefined : <LogoutRoundedIcon />}
             onClick={logout}
+            sx={{ 
+              minWidth: { xs: 44, sm: 'auto' },
+              flex: { xs: 1, sm: 'initial' },
+            }}
           >
-            Выйти
+            {isMobile ? <LogoutRoundedIcon /> : 'Выйти'}
           </Button>
           <Button
             variant="contained"
-            startIcon={<AddRoundedIcon />}
+            startIcon={isMobile ? undefined : <AddRoundedIcon />}
             onClick={() => {
               setEditingProject(null);
               setModalOpen(true);
             }}
+            sx={{ 
+              minWidth: { xs: 44, sm: 'auto' },
+              flex: { xs: 1, sm: 'initial' },
+            }}
           >
-            Новый проект
+            {isMobile ? <AddRoundedIcon /> : 'Новый проект'}
           </Button>
         </Stack>
       </Stack>
@@ -218,7 +235,14 @@ const DashboardPage = () => {
       <Dialog
         open={!!deleteConfirm}
         onClose={() => setDeleteConfirm(null)}
-        PaperProps={{ sx: { borderRadius: 3 } }}
+        fullScreen={isMobile}
+        PaperProps={{ 
+          sx: { 
+            borderRadius: isMobile ? '16px 16px 0 0' : 3,
+            margin: isMobile ? 0 : '32px',
+            maxHeight: isMobile ? '50vh' : 'auto',
+          } 
+        }}
       >
         <DialogTitle>Удалить проект?</DialogTitle>
         <DialogContent>
@@ -227,9 +251,25 @@ const DashboardPage = () => {
             нельзя отменить.
           </Typography>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setDeleteConfirm(null)}>Отмена</Button>
-          <Button onClick={handleDelete} color="error" variant="contained">
+        <DialogActions sx={{ 
+          px: 3,
+          pb: isMobile ? 3 : 2,
+          gap: 1,
+          flexDirection: isMobile ? 'column-reverse' : 'row',
+        }}>
+          <Button 
+            onClick={() => setDeleteConfirm(null)}
+            fullWidth={isMobile}
+            variant={isMobile ? 'outlined' : 'text'}
+          >
+            Отмена
+          </Button>
+          <Button 
+            onClick={handleDelete} 
+            color="error" 
+            variant="contained"
+            fullWidth={isMobile}
+          >
             Удалить
           </Button>
         </DialogActions>

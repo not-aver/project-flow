@@ -74,6 +74,11 @@ const RegisterPage = () => {
             size="large"
             loading={submitting}
             fullWidth
+            sx={{
+              py: 1.5,
+              fontSize: '1rem',
+              fontWeight: 600,
+            }}
           >
             Создать
           </LoadingButton>

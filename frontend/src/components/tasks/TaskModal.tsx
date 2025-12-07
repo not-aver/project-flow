@@ -8,8 +8,17 @@ import {
   Button,
   Stack,
   MenuItem,
+  useTheme,
+  useMediaQuery,
+  Slide,
 } from '@mui/material';
+import { TransitionProps } from '@mui/material/transitions';
 import { Task, CreateTaskPayload } from '../../services/taskService';
+
+// Bottom sheet transition for mobile
+const SlideTransition = (props: TransitionProps & { children: React.ReactElement }) => {
+  return <Slide direction="up" {...props} />;
+};
 
 type TaskModalProps = {
   open: boolean;
@@ -21,6 +30,9 @@ type TaskModalProps = {
 };
 
 const TaskModal = ({ open, onClose, onSubmit, defaultStatus = 'TODO', task, loading = false }: TaskModalProps) => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  
   const [form, setForm] = useState({
     title: '',
     description: '',
@@ -54,27 +66,53 @@ const TaskModal = ({ open, onClose, onSubmit, defaultStatus = 'TODO', task, load
   };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: '10px' } }}>
+    <Dialog 
+      open={open} 
+      onClose={onClose} 
+      maxWidth="sm" 
+      fullWidth
+      fullScreen={isMobile}
+      TransitionComponent={isMobile ? SlideTransition : undefined}
+      PaperProps={{ 
+        sx: { 
+          borderRadius: isMobile ? '16px 16px 0 0' : '10px',
+          maxHeight: isMobile ? '90vh' : 'auto',
+          margin: isMobile ? '0' : '32px',
+          position: isMobile ? 'fixed' : 'relative',
+          bottom: isMobile ? 0 : 'auto',
+          top: isMobile ? 'auto' : 'auto',
+        } 
+      }}
+    >
       <form onSubmit={handleSubmit}>
-        <DialogTitle>{task ? 'Обновить задачу' : 'Новая задача'}</DialogTitle>
+        <DialogTitle sx={{ 
+          pt: isMobile ? 3 : 2,
+          pb: isMobile ? 2 : 2,
+        }}>
+          {task ? 'Обновить задачу' : 'Новая задача'}
+        </DialogTitle>
         <DialogContent>
           <Stack spacing={3} pt={1}>
             <TextField
               label="Заголовок"
               required
+              fullWidth
               value={form.title}
               onChange={(e) => setForm((prev) => ({ ...prev, title: e.target.value }))}
+              autoFocus={!isMobile}
             />
             <TextField
               label="Описание"
               multiline
-              rows={3}
+              fullWidth
+              rows={isMobile ? 4 : 3}
               value={form.description}
               onChange={(e) => setForm((prev) => ({ ...prev, description: e.target.value }))}
             />
             <TextField
               select
               label="Статус"
+              fullWidth
               value={form.status}
               onChange={(e) => setForm((prev) => ({ ...prev, status: e.target.value as Task['status'] }))}
             >
@@ -84,11 +122,27 @@ const TaskModal = ({ open, onClose, onSubmit, defaultStatus = 'TODO', task, load
             </TextField>
           </Stack>
         </DialogContent>
-        <DialogActions sx={{ px: 3, pb: 3 }}>
-          <Button onClick={onClose} disabled={loading}>
+        <DialogActions sx={{ 
+          px: 3, 
+          pb: isMobile ? 3 : 3,
+          pt: 2,
+          gap: 1,
+          flexDirection: isMobile ? 'column-reverse' : 'row',
+        }}>
+          <Button 
+            onClick={onClose} 
+            disabled={loading}
+            fullWidth={isMobile}
+            variant={isMobile ? 'outlined' : 'text'}
+          >
             Отмена
           </Button>
-          <Button type="submit" variant="contained" disabled={loading || !form.title.trim()}>
+          <Button 
+            type="submit" 
+            variant="contained" 
+            disabled={loading || !form.title.trim()}
+            fullWidth={isMobile}
+          >
             {task ? 'Сохранить' : 'Создать'}
           </Button>
         </DialogActions>
