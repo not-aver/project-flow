@@ -32,44 +32,140 @@ const fadeInUp = keyframes`
   }
 `;
 
-// Волновой декоративный элемент
-const WaveDecoration = () => (
-  <Box
-    sx={{
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      right: 0,
-      height: { xs: '180px', sm: '220px' },
-      overflow: 'hidden',
-      zIndex: 0,
-    }}
-  >
-    <svg
-      viewBox="0 0 1200 120"
-      preserveAspectRatio="none"
-      style={{
+// Анимированный волновой паттерн для фона
+const WavePattern = () => {
+  const wave1Animation = keyframes`
+    0% { transform: translateX(0) translateY(0); }
+    50% { transform: translateX(-25%) translateY(10px); }
+    100% { transform: translateX(0) translateY(0); }
+  `;
+
+  const wave2Animation = keyframes`
+    0% { transform: translateX(0) translateY(0); }
+    50% { transform: translateX(-15%) translateY(-10px); }
+    100% { transform: translateX(0) translateY(0); }
+  `;
+
+  const wave3Animation = keyframes`
+    0% { transform: translateX(0) translateY(0); }
+    50% { transform: translateX(-35%) translateY(5px); }
+    100% { transform: translateX(0) translateY(0); }
+  `;
+
+  return (
+    <Box
+      sx={{
         position: 'absolute',
         top: 0,
         left: 0,
-        width: '100%',
-        height: '100%',
+        right: 0,
+        bottom: 0,
+        overflow: 'hidden',
+        zIndex: 0,
       }}
     >
-      <defs>
-        <linearGradient id="waveGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%" style={{ stopColor: '#C084FC', stopOpacity: 1 }} />
-          <stop offset="50%" style={{ stopColor: '#7C3AED', stopOpacity: 1 }} />
-          <stop offset="100%" style={{ stopColor: '#5B21B6', stopOpacity: 1 }} />
-        </linearGradient>
-      </defs>
-      <path
-        d="M0,60 C300,100 600,20 900,60 C1050,80 1150,50 1200,40 L1200,0 L0,0 Z"
-        fill="url(#waveGradient)"
+      {/* Wave 1 */}
+      <Box
+        sx={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          opacity: 0.3,
+          animation: `${wave1Animation} 20s ease-in-out infinite`,
+        }}
+      >
+        <svg
+          viewBox="0 0 1440 320"
+          preserveAspectRatio="none"
+          style={{
+            position: 'absolute',
+            width: '200%',
+            height: '100%',
+          }}
+        >
+          <path
+            fill="rgba(255, 255, 255, 0.1)"
+            d="M0,96L48,112C96,128,192,160,288,186.7C384,213,480,235,576,213.3C672,192,768,128,864,128C960,128,1056,192,1152,197.3C1248,203,1344,149,1392,122.7L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"
+          />
+        </svg>
+      </Box>
+
+      {/* Wave 2 */}
+      <Box
+        sx={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          opacity: 0.2,
+          animation: `${wave2Animation} 15s ease-in-out infinite`,
+        }}
+      >
+        <svg
+          viewBox="0 0 1440 320"
+          preserveAspectRatio="none"
+          style={{
+            position: 'absolute',
+            width: '200%',
+            height: '100%',
+          }}
+        >
+          <path
+            fill="rgba(255, 255, 255, 0.15)"
+            d="M0,160L48,176C96,192,192,224,288,224C384,224,480,192,576,165.3C672,139,768,117,864,128C960,139,1056,181,1152,186.7C1248,192,1344,160,1392,144L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"
+          />
+        </svg>
+      </Box>
+
+      {/* Wave 3 */}
+      <Box
+        sx={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          opacity: 0.25,
+          animation: `${wave3Animation} 25s ease-in-out infinite`,
+        }}
+      >
+        <svg
+          viewBox="0 0 1440 320"
+          preserveAspectRatio="none"
+          style={{
+            position: 'absolute',
+            width: '200%',
+            height: '100%',
+          }}
+        >
+          <path
+            fill="rgba(255, 255, 255, 0.08)"
+            d="M0,224L48,213.3C96,203,192,181,288,181.3C384,181,480,203,576,208C672,213,768,203,864,181.3C960,160,1056,128,1152,133.3C1248,139,1344,181,1392,202.7L1440,224L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"
+          />
+        </svg>
+      </Box>
+
+      {/* Flow particles */}
+      <Box
+        sx={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: `
+            radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+            radial-gradient(circle at 80% 70%, rgba(255, 255, 255, 0.08) 0%, transparent 50%),
+            radial-gradient(circle at 40% 80%, rgba(255, 255, 255, 0.12) 0%, transparent 40%)
+          `,
+        }}
       />
-    </svg>
-  </Box>
-);
+    </Box>
+  );
+};
 
 const AuthLayout = ({ title, footer, children }: PropsWithChildren<AuthLayoutProps>) => {
   return (
@@ -141,24 +237,12 @@ const AuthLayout = ({ title, footer, children }: PropsWithChildren<AuthLayoutPro
             xs: `${gradientAnimation} 15s ease infinite`,
             md: 'none',
           },
-          '&::before': {
-            content: { xs: '""', md: 'none' },
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: {
-              xs: 'radial-gradient(circle at 20% 80%, rgba(192, 132, 252, 0.3) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(139, 92, 246, 0.3) 0%, transparent 50%)',
-              md: 'none',
-            },
-            pointerEvents: 'none',
-          },
         }}
       >
-        {/* Wave decoration - only on mobile */}
-        <Box sx={{ display: { xs: 'none', md: 'none' } }}>
-          <WaveDecoration />
+        {/* Wave pattern - only on mobile */}
+        {/* Conditional rendering with display would show in DOM, so we check with JS */}
+        <Box sx={{ display: { xs: 'block', md: 'none' } }}>
+          <WavePattern />
         </Box>
 
         <Box
@@ -206,13 +290,27 @@ const AuthLayout = ({ title, footer, children }: PropsWithChildren<AuthLayoutPro
           </Paper>
 
           {footer && (
-            <Box mt={4}>
+            <Box 
+              mt={4}
+              sx={{
+                backgroundColor: { xs: 'rgba(255, 255, 255, 0.15)', md: 'transparent' },
+                backdropFilter: { xs: 'blur(10px)', md: 'none' },
+                padding: { xs: 2, md: 0 },
+                borderRadius: { xs: '12px', md: 0 },
+                border: { xs: '1px solid rgba(255, 255, 255, 0.2)', md: 'none' },
+              }}
+            >
               <Typography
                 variant="body2"
                 textAlign="center"
                 sx={{
-                  color: { xs: 'rgba(255, 255, 255, 0.95)', md: 'text.secondary' },
-                  fontWeight: { xs: 500, md: 400 },
+                  color: { xs: 'white', md: 'text.secondary' },
+                  fontWeight: { xs: 600, md: 400 },
+                  '& a': {
+                    color: { xs: 'white', md: 'primary.main' },
+                    textDecoration: 'underline',
+                    fontWeight: 700,
+                  },
                 }}
               >
                 {footer}

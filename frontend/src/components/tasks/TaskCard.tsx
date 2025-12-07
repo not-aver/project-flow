@@ -102,50 +102,55 @@ const TaskCard = ({ task, onEdit, onDelete }: TaskCardProps) => {
     <Box 
       sx={{ 
         position: 'relative',
-        overflow: 'hidden',
         borderRadius: '10px',
       }}
     >
-      {/* Swipe Action Backgrounds - Mobile Only */}
-      {isMobile && (
+      {/* Swipe Action Backgrounds - Mobile Only, only visible during swipe */}
+      {isMobile && swipeOffset !== 0 && (
         <>
-          {/* Left swipe - Delete */}
-          <Box
-            sx={{
-              position: 'absolute',
-              top: 0,
-              right: 0,
-              bottom: 0,
-              width: '80px',
-              bgcolor: 'error.main',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              borderRadius: '10px',
-              zIndex: 0,
-            }}
-          >
-            <DeleteRoundedIcon sx={{ color: 'white' }} />
-          </Box>
+          {/* Left swipe - Delete (visible when swiping left) */}
+          {swipeOffset < 0 && (
+            <Box
+              sx={{
+                position: 'absolute',
+                top: 0,
+                right: 0,
+                bottom: 0,
+                width: '100px',
+                bgcolor: 'error.main',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'flex-start',
+                paddingLeft: 2,
+                borderRadius: '10px',
+                zIndex: 0,
+              }}
+            >
+              <DeleteRoundedIcon sx={{ color: 'white', fontSize: 28 }} />
+            </Box>
+          )}
           
-          {/* Right swipe - Edit */}
-          <Box
-            sx={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              bottom: 0,
-              width: '80px',
-              bgcolor: 'primary.main',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              borderRadius: '10px',
-              zIndex: 0,
-            }}
-          >
-            <EditRoundedIcon sx={{ color: 'white' }} />
-          </Box>
+          {/* Right swipe - Edit (visible when swiping right) */}
+          {swipeOffset > 0 && (
+            <Box
+              sx={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                bottom: 0,
+                width: '100px',
+                bgcolor: 'primary.main',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'flex-end',
+                paddingRight: 2,
+                borderRadius: '10px',
+                zIndex: 0,
+              }}
+            >
+              <EditRoundedIcon sx={{ color: 'white', fontSize: 28 }} />
+            </Box>
+          )}
         </>
       )}
 
@@ -159,6 +164,7 @@ const TaskCard = ({ task, onEdit, onDelete }: TaskCardProps) => {
           borderRadius: '10px',
           position: 'relative',
           zIndex: 1,
+          overflow: 'hidden',
           transform: isMobile ? `translateX(${swipeOffset}px)` : 'none',
           transition: isSwipeAction ? 'transform 0.2s ease-out, opacity 0.2s ease-out' : 'transform 0.1s ease-out',
           opacity: isSwipeAction ? 0.5 : 1,
@@ -169,45 +175,103 @@ const TaskCard = ({ task, onEdit, onDelete }: TaskCardProps) => {
           ...cardBackground,
         }}
       >
-      <CardContent sx={{ '&:last-child': { pb: 2 } }}>
-        <Stack direction="row" alignItems="center" spacing={1} mb={1}>
-          <DragIndicatorRoundedIcon fontSize="small" sx={{ color: 'text.disabled' }} />
-          <Typography variant="subtitle1" fontWeight={600}>
+      <CardContent sx={{ 
+        p: { xs: 2.5, md: 2 },
+        '&:last-child': { pb: { xs: 2.5, md: 2 } } 
+      }}>
+        <Stack direction="row" alignItems="center" spacing={1} mb={{ xs: 1.5, md: 1 }}>
+          {!isMobile && (
+            <DragIndicatorRoundedIcon fontSize="small" sx={{ color: 'text.disabled', cursor: 'grab' }} />
+          )}
+          <Typography 
+            variant="subtitle1" 
+            fontWeight={600}
+            sx={{
+              fontSize: { xs: '1rem', md: '0.875rem' },
+              lineHeight: { xs: 1.5, md: 1.43 },
+            }}
+          >
             {task.title}
           </Typography>
         </Stack>
 
         {task.description ? (
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
+          <Typography 
+            variant="body2" 
+            color="text.secondary" 
+            sx={{ 
+              mb: { xs: 2, md: 1.5 },
+              fontSize: { xs: '0.875rem', md: '0.875rem' },
+              lineHeight: { xs: 1.6, md: 1.43 },
+            }}
+          >
             {task.description}
           </Typography>
         ) : (
-          <Typography variant="body2" color="text.disabled" sx={{ mb: 1.5, fontStyle: 'italic' }}>
+          <Typography 
+            variant="body2" 
+            color="text.disabled" 
+            sx={{ 
+              mb: { xs: 2, md: 1.5 }, 
+              fontStyle: 'italic',
+              fontSize: { xs: '0.875rem', md: '0.875rem' },
+            }}
+          >
             Нет описания
           </Typography>
         )}
 
-        <Stack direction="row" spacing={1} alignItems="center">
-          <Chip label={statusLabels[task.status]} size="small" {...chipProps} />
-          <Stack direction="row" spacing={0.5} ml="auto">
+        <Stack direction="row" spacing={{ xs: 1.5, md: 1 }} alignItems="center">
+          <Chip 
+            label={statusLabels[task.status]} 
+            size="small" 
+            {...chipProps}
+            sx={{
+              height: { xs: 28, md: 24 },
+              fontSize: { xs: '0.813rem', md: '0.75rem' },
+            }}
+          />
+          <Stack direction="row" spacing={{ xs: 0.5, md: 0.5 }} ml="auto">
             <Tooltip title="Комментарии">
-              <IconButton size="small" onClick={() => setCommentsOpen(true)}>
+              <IconButton 
+                size={isMobile ? 'medium' : 'small'} 
+                onClick={() => setCommentsOpen(true)}
+                sx={{
+                  minWidth: { xs: 44, md: 'auto' },
+                  minHeight: { xs: 44, md: 'auto' },
+                }}
+              >
                 <Badge color="primary" badgeContent={commentCount ?? 0} invisible={commentCount === null} max={99}>
-                  <ChatBubbleOutlineRoundedIcon fontSize="small" />
+                  <ChatBubbleOutlineRoundedIcon fontSize={isMobile ? 'medium' : 'small'} />
                 </Badge>
               </IconButton>
             </Tooltip>
             {onEdit && (
               <Tooltip title="Редактировать">
-                <IconButton size="small" onClick={() => onEdit(task)}>
-                  <EditRoundedIcon fontSize="small" />
+                <IconButton 
+                  size={isMobile ? 'medium' : 'small'} 
+                  onClick={() => onEdit(task)}
+                  sx={{
+                    minWidth: { xs: 44, md: 'auto' },
+                    minHeight: { xs: 44, md: 'auto' },
+                  }}
+                >
+                  <EditRoundedIcon fontSize={isMobile ? 'medium' : 'small'} />
                 </IconButton>
               </Tooltip>
             )}
             {onDelete && (
               <Tooltip title="Удалить">
-                <IconButton size="small" color="error" onClick={() => onDelete(task)}>
-                  <DeleteRoundedIcon fontSize="small" />
+                <IconButton 
+                  size={isMobile ? 'medium' : 'small'} 
+                  color="error" 
+                  onClick={() => onDelete(task)}
+                  sx={{
+                    minWidth: { xs: 44, md: 'auto' },
+                    minHeight: { xs: 44, md: 'auto' },
+                  }}
+                >
+                  <DeleteRoundedIcon fontSize={isMobile ? 'medium' : 'small'} />
                 </IconButton>
               </Tooltip>
             )}
