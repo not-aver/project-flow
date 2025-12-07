@@ -8,17 +8,16 @@ services:
       - key: APP_SECRET
         generateValue: true
       - key: PORT
-        value: 4000
+        value: 10000
       - key: NODE_ENV
         value: production
       - key: DB_DIALECT
         value: sqlite
+      - key: FRONTEND_URL
+        value: https://projectflow-c9qn.onrender.com
 
   - type: web
     name: projectflow-frontend
     env: static
-    buildCommand: cd frontend && npm install && npm run build
+    buildCommand: cd frontend && npm install && VITE_API_URL=https://projectflow-backend-akfz.onrender.com/api npm run build
     staticPublishPath: frontend/dist
-    envVars:
-      - key: VITE_API_URL
-        value: https://projectflow-backend.onrender.com/api
